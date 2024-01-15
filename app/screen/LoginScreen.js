@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import Screen from "../components/ScreenComponent";
 import * as Yup from "yup";
@@ -8,6 +8,7 @@ import AppText from "../components/typo/AppText";
 import AppFormField from "../components/forms/AppFormField";
 import colors from "../config/colors";
 import AppForm from "../components/forms/AppForm";
+import { API } from "../config/axios";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label("Email"),
@@ -16,8 +17,15 @@ const validationSchema = Yup.object().shape({
 const LoginScreen = () => {
   const navigation = useNavigation();
 
-  const handleLogin = (values) => {
-    navigation.navigate("Home");
+  const handleLogin = async (values) => {
+    try {
+      const response = await API.post("/auth/login", values);
+      console.log(response.data);
+      navigation.navigate("Home");
+    } catch (error) {
+      console.log(error.response.data);
+      Alert.alert("Error", "Incorrect email or password");
+    }
   };
 
   return (
@@ -97,6 +105,7 @@ const LoginScreen = () => {
               text="Forgot Password?"
               color={colors.primaryText}
               bold={false}
+              center={false}
             />
           </View>
           <AppSubmitButton title="Login" />

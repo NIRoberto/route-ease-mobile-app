@@ -8,13 +8,29 @@ import colors from "../config/colors";
 import AppSubmitButton from "../components/forms/AppSubmitButton";
 import { useNavigation } from "@react-navigation/native";
 import * as Yup from "yup";
+import { API } from "../config/axios";
 
 const validationSchema = Yup.object().shape({
+  fullNames: Yup.string().required().min(4).label("Names"),
   email: Yup.string().required().email().label("Email"),
   password: Yup.string().required().min(4).label("Password"),
 });
+
 const RegisterScreen = () => {
   const navigation = useNavigation();
+
+  const HandleRegister = async (values) => {
+    console.log(values);
+    try {
+      const response = await API.post("/auth/signup", {
+        ...values,
+        role:"user"
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <Screen>
@@ -34,10 +50,18 @@ const RegisterScreen = () => {
           />
         </View>
         <AppForm
-          initialValues={{ email: "", password: "" }}
-          onSubmit={(values) => console.log(values)}
+          initialValues={{ email: "", password: "", fullNames: "" }}
+          onSubmit={(values) => HandleRegister(values)}
           validationSchema={validationSchema}
         >
+          <AppFormField
+            autoCapitalize="none"
+            autoCorrect={false}
+            icon="account"
+            name="fullNames"
+            placeholder="Full Names"
+            textContentType="name"
+          />
           <AppFormField
             autoCapitalize="none"
             autoCorrect={false}
@@ -78,7 +102,6 @@ const RegisterScreen = () => {
               onPress={() => navigation.navigate("Login")}
               color={colors.primaryButton}
               size={15}
-          
               bold={false}
             />
           </View>

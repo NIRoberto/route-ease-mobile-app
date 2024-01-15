@@ -37,7 +37,6 @@ const AccountScreen = () => {
 
   const handleNo = () => {
     setLogoutConfirmModel(false);
-
     console.log("No");
   };
 
@@ -107,8 +106,8 @@ const AccountScreen = () => {
         <ReusableModal
           animationType=""
           transparent={true}
-          visible={logoutConfirmModel}
-          onRequestClose={handleNo}
+          modalVisible={logoutConfirmModel}
+          setModalVisible={() => setLogoutConfirmModel(false)}
         >
           <View
             style={{
