@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import Screen from "../components/ScreenComponent";
 import AppForm from "../components/forms/AppForm";
 import AppFormField from "../components/forms/AppFormField";
@@ -9,6 +9,8 @@ import AppSubmitButton from "../components/forms/AppSubmitButton";
 import { useNavigation } from "@react-navigation/native";
 import * as Yup from "yup";
 import { API } from "../config/axios";
+import { storeData } from "../config/storage";
+import AppContext from "../context/context";
 
 const validationSchema = Yup.object().shape({
   fullNames: Yup.string().required().min(4).label("Names"),
@@ -17,18 +19,24 @@ const validationSchema = Yup.object().shape({
 });
 
 const RegisterScreen = () => {
+  const { setUser, user } = useContext(AppContext);
+
   const navigation = useNavigation();
 
   const HandleRegister = async (values) => {
-    console.log(values);
+    const userData = {
+      ...values,
+      role: "user",
+    };
     try {
-      const response = await API.post("/auth/signup", {
-        ...values,
-        role:"user"
+      const response = await API.post("auth/signup", {
+        ...userData,
       });
       console.log(response.data);
+      storeData("user", response.data);
+      setUser(response.data);
     } catch (error) {
-      console.log(error);
+      console.log(error.response.data);
     }
   };
 

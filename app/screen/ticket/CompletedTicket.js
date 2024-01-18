@@ -1,14 +1,29 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useContext } from "react";
+import AppContext from "../../context/context";
+import ScreenComponent from "../../components/ScreenComponent";
+import AppText from "../../components/typo/AppText";
+import { TicketCard } from "./ActiveTicket";
 
 const CompletedTicket = () => {
+  const { tickets } = useContext(AppContext);
+  console.log(tickets);
+
   return (
-    <View>
-      <Text>CompletedTicket</Text>
-    </View>
-  )
-}
+    <ScreenComponent>
+      <AppText text={"Completed Ticket"} size={20} bold={true} center={true} />
 
-export default CompletedTicket
+      <FlatList
+        data={tickets?.filter((item) => item.status === "paid")}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => {
+          return <TicketCard {...item} />;
+        }}
+      />
+    </ScreenComponent>
+  );
+};
 
-const styles = StyleSheet.create({})
+export default CompletedTicket;
+
+const styles = StyleSheet.create({});

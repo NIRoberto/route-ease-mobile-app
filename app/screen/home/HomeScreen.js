@@ -16,6 +16,10 @@ import AppSubmitButton from "../../components/forms/AppSubmitButton";
 import { useNavigation } from "@react-navigation/native";
 import AppFormPicker from "../../components/forms/AppFormPicket";
 import AppFormDatePicker from "../../components/forms/AppFormDatePicker";
+import { useContext, useEffect, useState } from "react";
+import { API } from "../../config/axios";
+import AppFormField from "../../components/forms/AppFormField";
+import AppContext from "../../context/context";
 
 // locationArrays.js
 
@@ -32,6 +36,37 @@ export const toLocations = [
   { label: "Musanze", id: 2, value: "Musanze" },
   // Add more locations as needed
 ];
+
+const timeArray = [
+  { label: "00:00", id: 0, value: "00:00" },
+  { label: "01:00", id: 1, value: "01:00" },
+  { label: "02:00", id: 2, value: "02:00" },
+  { label: "03:00", id: 3, value: "03:00" },
+  { label: "04:00", id: 4, value: "04:00" },
+  { label: "05:00", id: 5, value: "05:00" },
+  { label: "06:00", id: 6, value: "06:00" },
+  { label: "07:00", id: 7, value: "07:00" },
+  { label: "08:00", id: 8, value: "08:00" },
+  { label: "09:00", id: 9, value: "09:00" },
+  { label: "10:00", id: 10, value: "10:00" },
+  { label: "11:00", id: 11, value: "11:00" },
+  { label: "12:00", id: 12, value: "12:00" },
+  { label: "13:00", id: 13, value: "13:00" },
+  { label: "14:00", id: 14, value: "14:00" },
+  { label: "15:00", id: 15, value: "15:00" },
+  { label: "16:00", id: 16, value: "16:00" },
+  { label: "17:00", id: 17, value: "17:00" },
+  { label: "18:00", id: 18, value: "18:00" },
+  { label: "19:00", id: 19, value: "19:00" },
+  { label: "20:00", id: 20, value: "20:00" },
+  { label: "21:00", id: 21, value: "21:00" },
+  { label: "22:00", id: 22, value: "22:00" },
+  { label: "23:00", id: 23, value: "23:00" },
+];
+
+// Example output
+
+// Example output
 
 const OperationItem = ({ title, icon, color }) => {
   return (
@@ -83,6 +118,7 @@ const OperationArray = [
 ];
 
 const HomeScreen = () => {
+  const { user } = useContext(AppContext);
   const navigation = useNavigation();
   const currentHour = new Date().getHours();
   const greeting =
@@ -91,6 +127,46 @@ const HomeScreen = () => {
       : currentHour < 18
       ? "Good Afternoon"
       : "Good Evening";
+
+  const [jounery, setJourney] = useState([]);
+
+  useEffect(() => {
+    const fetchJourneys = async () => {
+      try {
+        const response = await API.get("directions/getAlldirections");
+        setJourney(response.data.data);
+      } catch (error) {
+        console.log(error.response);
+      }
+    };
+
+    fetchJourneys();
+  }, []);
+
+  const departureCity = jounery.map((item) => {
+    return {
+      label: item.departureCity,
+      id: item.id,
+      value: item.departureCity,
+    };
+  });
+
+  const destinationCity = jounery.map((item) => {
+    return {
+      label: item.destinationCity,
+      id: item.id,
+      value: item.destinationCity,
+    };
+  });
+
+  const combineDepartureDestination = departureCity.map((item, index) => {
+    console.log(item);
+    return {
+      label: item.label + "-" + destinationCity[index].label,
+      id: index,
+      value: item.label + "-" + destinationCity[index].label,
+    };
+  });
 
   return (
     <ScreenComponent>
@@ -120,7 +196,9 @@ const HomeScreen = () => {
               >
                 <Image
                   style={styles.profile}
-                  source={require("../../assets/Robert.png")}
+                  source={{
+                    uri: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+                  }}
                 />
                 <View
                   style={{
@@ -136,7 +214,7 @@ const HomeScreen = () => {
                     size={15}
                   />
                   <AppText
-                    text="Robert Niyitanga"
+                    text={user?.user?.fullNames}
                     size={15}
                     color={"white"}
                     center={true}
@@ -199,9 +277,9 @@ const HomeScreen = () => {
               />
 
               <AppForm
-                initialValues={{ from: "", to: "" }}
+                initialValues={{ route: "", departureDate: "" }}
                 onSubmit={(values) => {
-                  // console.log(values);
+                  console.log(values);
                   navigation.navigate("SearchTicketResult", { data: values });
                 }}
               >
@@ -215,15 +293,16 @@ const HomeScreen = () => {
                 /> */}
 
                 <AppFormPicker
-                  name="Origin"
-                  items={fromLocations}
-                  placeholder="Select Origin"
+                  name="route"
+                  items={combineDepartureDestination}
+                  placeholder="Select where to go"
                 />
-                <AppFormPicker
-                  name="Destination"
-                  items={toLocations}
+
+                {/* <AppFormPicker
+                  name="destinationCity"
+                  items={destinationCity}
                   placeholder="Select Destination"
-                />
+                /> */}
 
                 {/* <AppFormField
                   autoCapitalize="none"
@@ -237,6 +316,36 @@ const HomeScreen = () => {
                   name="departureDate"
                   placeholder="Departure Date"
                 />
+                {/* <AppFormPicker
+                  name="departureTime"
+                  items={[
+                    { label: "00:00", id: 0, value: "00:00" },
+                    { label: "01:00", id: 1, value: "01:00" },
+                    { label: "02:00", id: 2, value: "02:00" },
+                    { label: "03:00", id: 3, value: "03:00" },
+                    { label: "04:00", id: 4, value: "04:00" },
+                    { label: "05:00", id: 5, value: "05:00" },
+                    { label: "06:00", id: 6, value: "06:00" },
+                    { label: "07:00", id: 7, value: "07:00" },
+                    { label: "08:00", id: 8, value: "08:00" },
+                    { label: "09:00", id: 9, value: "09:00" },
+                    { label: "10:00", id: 10, value: "10:00" },
+                    { label: "11:00", id: 11, value: "11:00" },
+                    { label: "12:00", id: 12, value: "12:00" },
+                    { label: "13:00", id: 13, value: "13:00" },
+                    { label: "14:00", id: 14, value: "14:00" },
+                    { label: "15:00", id: 15, value: "15:00" },
+                    { label: "16:00", id: 16, value: "16:00" },
+                    { label: "17:00", id: 17, value: "17:00" },
+                    { label: "18:00", id: 18, value: "18:00" },
+                    { label: "19:00", id: 19, value: "19:00" },
+                    { label: "20:00", id: 20, value: "20:00" },
+                    { label: "21:00", id: 21, value: "21:00" },
+                    { label: "22:00", id: 22, value: "22:00" },
+                    { label: "23:00", id: 23, value: "23:00" },
+                  ]}
+                  placeholder="Departure Time"
+                /> */}
 
                 {/* <AppFormField
                   autoCapitalize="none"

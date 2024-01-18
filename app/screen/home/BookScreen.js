@@ -9,88 +9,7 @@ import AppFormField from "../../components/forms/AppFormField";
 import AppText from "../../components/typo/AppText";
 import ScreenComponent from "../../components/ScreenComponent";
 import AppSubmitButton from "../../components/forms/AppSubmitButton";
-
-export const RouteCard = ({
-  travelAgency: { image, name, dateOfJourney },
-  startTime,
-  endTime,
-  date,
-  status,
-  duration,
-}) => {
-  const navigation = useNavigation();
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        // console.log("Route Card Pressed");
-        // navigation.navigate("Book", {
-        //   data: {
-        //     travelAgency: {
-        //       image,
-        //       name,
-        //       dateOfJourney,
-        //     },
-        //     startTime,
-        //     endTime,
-        //     date,
-        //     status,
-        //     duration,
-        //   },
-        // });
-      }}
-    >
-      <View style={styles.routeCard}>
-        <View style={styles.routeCardHeader}>
-          <Image
-            style={styles.routeCardHeaderImage}
-            source={require("../../assets/agency/ritco.jpeg")}
-          />
-          <View style={styles.routeCardHeaderDetails}>
-            <AppText
-              text={name}
-              color={"black"}
-              center={false}
-              size={18}
-              bold={true}
-            />
-            {/* <AppText text={dateOfJourney} color={"black"} bold={false} /> */}
-          </View>
-        </View>
-        <View style={styles.routeCardDetails}>
-          <View style={styles.routeCardDetailsLeft}>
-            <AppText
-              text={startTime}
-              color={"black"}
-              center={false}
-              bold={false}
-            />
-            <AppText
-              text={endTime}
-              color={"black"}
-              center={false}
-              bold={false}
-            />
-          </View>
-          <View style={styles.routeCardDetailsRight}>
-            <AppText text={date} color={"black"} bold={false} center={false} />
-            <AppText
-              text={status}
-              color={status === "Available" ? "green" : "red"}
-              bold={false}
-              center={false}
-            />
-            <AppText
-              text={duration}
-              color={"black"}
-              center={false}
-              bold={false}
-            />
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
+import { RouteCard } from "./SearchTicketResultScreen";
 
 const BookScreen = ({ route }) => {
   const { params } = useRoute();
@@ -119,7 +38,7 @@ const BookScreen = ({ route }) => {
         <View style={styles.contactDetails}>
           <AppForm
             initialValues={{
-              fullName: "",
+              fullNames: "",
               email: "",
               phone: "",
             }}
@@ -134,13 +53,13 @@ const BookScreen = ({ route }) => {
             }}
           >
             <AppFormField
-              name={"Names"}
+              name={"fullNames"}
               placeholder="Full Names"
               key={"Names"}
             />
-            <AppFormField name={"Email"} placeholder="Email" key={"email"} />
-            <AppFormField name="Phone" placeholder="Phone" />
-            <AppSubmitButton title="Book" />
+            <AppFormField name={"email"} placeholder="Email" key={"email"} />
+            <AppFormField name="phone" placeholder="Phone" />
+            <AppSubmitButton title="Continue" />
           </AppForm>
         </View>
       </View>

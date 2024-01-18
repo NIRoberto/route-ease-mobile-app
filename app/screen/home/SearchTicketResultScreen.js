@@ -1,10 +1,12 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import colors from "../../config/colors";
 import AppText from "../../components/typo/AppText";
 import { useNavigation } from "@react-navigation/native";
 import ScreenComponent from "../../components/ScreenComponent";
+import { API } from "../../config/axios";
+import { capitalizeString } from "../../utils/func";
 
 const generateYearData = (year) => {
   const months = [
@@ -46,73 +48,89 @@ const generateYearData = (year) => {
   return yearData;
 };
 
-const dummyRoutes = [
-  {
-    id: 1,
-    travelAgency: {
-      image: "travel_agency1.jpg",
-      name: "Travel World",
-      dateOfJourney: "2024-01-15",
-    },
-    startTime: "10:00 AM", // Example start time
-    endTime: "02:00 PM", // Example end time
-    date: "2024-01-20",
-    status: "Available",
-    duration: "4 hours", // Example duration
-  },
-  {
-    id: 2,
-    travelAgency: {
-      image: "travel_agency2.jpg",
-      name: "Adventure Tours",
-      dateOfJourney: "2024-02-10",
-    },
-    startTime: "03:00 PM", // Example start time
-    endTime: "09:00 PM", // Example end time
-    date: "2024-02-15",
-    status: "Not Available",
-    duration: "6 hours", // Example duration
-  },
-  {
-    id: 3,
-    travelAgency: {
-      image: "travel_agency3.jpg",
-      name: "Dream Destinations",
-      dateOfJourney: "2024-03-05",
-    },
-    startTime: "11:00 AM", // Example start time
-    endTime: "04:00 PM", // Example end time
-    date: "2024-03-10",
-    status: "Available",
-    duration: "5 hours", // Example duration
-  },
-  {
-    id: 4,
-    travelAgency: {
-      image: "travel_agency3.jpg",
-      name: "Dream Destinations",
-      dateOfJourney: "2024-03-05",
-    },
-    startTime: "11:00 AM", // Example start time
-    endTime: "04:00 PM", // Example end time
-    date: "2024-03-10",
-    status: "Available",
-    duration: "5 hours", // Example duration
-  },
-  {
-    id: 5,
-    travelAgency: {
-      image: "travel_agency3.jpg",
-      name: "Dream Destinations",
-      dateOfJourney: "2024-03-05",
-    },
-    startTime: "11:00 AM", // Example start time
-    endTime: "04:00 PM", // Example end time
-    date: "2024-03-10",
-    status: "Available",
-    duration: "5 hours", // Example duration
-  },
-];
+// const dummyRoutes = [
+//   {
+//     _id: "65a683e317aa531c6ddacd53",
+//     TravelAgencyId: {
+//       _id: "65a57d61eb377d600b9a7851",
+//       travelAgenceName: "City Travels2",
+//       agencysites: [],
+//       contactInformation: "123-456-7890",
+//       routes: [
+//         "65a57d34eb377d600b9a784d",
+//         "65a57d34eb377d600b9a784d",
+//         "65a67d410a338915c9fea78c",
+//         "65a681c217aa531c6ddacd2b",
+//       ],
+//       Journeys: [],
+//       cars: ["65a57f83eb377d600b9a7860", "65a6a2a19a52d8852621b04e"],
+//       createdAt: "2024-01-15T18:45:53.434Z",
+//       updatedAt: "2024-01-16T15:37:05.829Z",
+//       TravelAgencyId: "65a57d61eb377d600b9a7851",
+//       __v: 6,
+//       image:
+//         "https://www.jobinrwanda.com/sites/default/files/styles/medium/public/employer_logos/xlogo_2130242003.png,qitok=a11ZtBb6.pagespeed.ic.wCryn_YzzN.jpg",
+//     },
+//     carId: {
+//       image:
+//         "https://www.google.com/imgres?imgurl=https%3A%2F%2Fwww.scania.com%2Fcontent%2Fdam%2Fgroup%2Fproducts-and-services%2Fbuses-and-coaches%2Fscania-buses-and-coaches-mobile-21080-006.jpg&tbnid=p1jzA6IN8WcGMM&vet=12ahUKEwiL-8GFyOGDAxU5mycCHRxxBtwQMyglegUIARDBAQ..i&imgrefurl=https%3A%2F%2Fwww.scania.com%2Fgroup%2Fen%2Fhome%2Fproducts-and-services%2Fbuses-and-coaches.html&docid=49WRzvvNDR-FyM&w=1434&h=1433&q=bus&ved=2ahUKEwiL-8GFyOGDAxU5mycCHRxxBtwQMyglegUIARDBAQ",
+//       _id: "65a57f83eb377d600b9a7860",
+//       TravelAgencyId: "65a57d61eb377d600b9a7851",
+//       travelAgencyName: "City Travels2",
+//       model: "Sedan",
+//       make: "Toyota",
+//       year: 2022,
+//       equipedseats: 25,
+//       driverName: "John Doe",
+//       telephone: "+1234567890",
+//       status: "available",
+//       availbleafter: "after 30 minutes",
+//       injourney: "none",
+//       CarId: "65a57f83eb377d600b9a7860",
+//       __v: 0,
+//     },
+//     directionId: {
+//       _id: "65a6838217aa531c6ddacd3f",
+//       TravelAgencyId: "65a57d61eb377d600b9a7851",
+//       RouteId: "65a681c217aa531c6ddacd2b",
+//       directionName: "musanze<- - ->kigali",
+//       departureCity: "musanze",
+//       destinationCity: "kigali",
+//       bookings: [],
+//       ticketsbooked: [],
+//       payedticketsbooked: [],
+//       nonpayedbookedtickets: [],
+//       bookedDate: [],
+//       bookedTime: [],
+//       periodic: 1,
+//       specificationofperiodic: "Weekly",
+//       createdDate: "2024-01-16T13:24:18.791Z",
+//       updatedDate: "2024-01-16T13:24:18.791Z",
+//       directionId: "65a6838217aa531c6ddacd3f",
+//       __v: 0,
+//     },
+//     RouteId: {},
+//     departureCity: "musanze",
+//     destinationCity: "kigali",
+//     travelAgenceName: "City Travels2",
+//     departureDate: "2024-01-16",
+//     pendingtickets: [],
+//     departureTime: "17:00",
+//     plannedSeats: 2,
+//     bookedSeats: 0,
+//     payedticketsbooked: [],
+//     payedSeats: 0,
+//     nonPayedSeats: 2,
+//     remainingNonPayedSeats: 0,
+//     ticketsbooked: [],
+//     status: "Pending",
+//     agents: [],
+//     createdDate: "2024-01-16T13:25:55.153Z",
+//     updatedDate: "2024-01-16T13:25:55.153Z",
+//     journeyId: "65a683e317aa531c6ddacd53",
+//     __v: 0,
+//   },
+// ];
 
 const FilterDate = ({ day, dayName, monthName, selected, onPress }) => {
   return (
@@ -143,82 +161,192 @@ const FilterDate = ({ day, dayName, monthName, selected, onPress }) => {
   );
 };
 
-const RouteCard = ({
-  travelAgency: { image, name, dateOfJourney },
-  startTime,
-  endTime,
-  date,
+export const RouteCard = ({
+  TravelAgencyId,
+  _id,
+  carId,
+  directionId,
+  RouteId,
+  departureCity,
+  destinationCity,
+  departureDate,
+  departureTime,
+  plannedSeats,
+  bookedSeats,
+  payedticketsbooked,
+  payedSeats,
+  nonPayedSeats,
+  remainingNonPayedSeats,
   status,
-  duration,
+  agents,
+  createdDate,
 }) => {
   const navigation = useNavigation();
   return (
     <TouchableOpacity
       onPress={() => {
-        console.log("Route Card Pressed");
         navigation.navigate("Book", {
           data: {
-            travelAgency: {
-              image,
-              name,
-              dateOfJourney,
-            },
-            startTime,
-            endTime,
-            date,
+            TravelAgencyId,
+            _id,
+            carId,
+            directionId,
+            RouteId,
+            departureCity,
+            destinationCity,
+            departureDate,
+            departureTime,
+            plannedSeats,
+            bookedSeats,
+            payedSeats,
+            nonPayedSeats,
             status,
-            duration,
+            agents,
+            createdDate,
           },
         });
       }}
+      style={{
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "white",
+        borderRadius: 10,
+        marginBottom: 10,
+      }}
     >
-      <View style={styles.routeCard}>
-        <View style={styles.routeCardHeader}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 10,
+          }}
+        >
           <Image
-            style={styles.routeCardHeaderImage}
-            source={require("../../assets/agency/ritco.jpeg")}
+            source={{
+              uri:
+                TravelAgencyId?.image ||
+                "https://horizonexpress.rw/wp-content/uploads/2022/02/Horizon_Express_Logo_Modified_page-0001__1_-removebg-preview.png",
+            }}
+            style={{ width: 50, height: 50, borderRadius: 10 }}
           />
-          <View style={styles.routeCardHeaderDetails}>
+          <View style={{ marginLeft: 10 }}>
             <AppText
-              text={name}
+              text={TravelAgencyId?.travelAgenceName}
               color={"black"}
-              center={false}
-              size={18}
               bold={true}
             />
-            {/* <AppText text={dateOfJourney} color={"black"} bold={false} /> */}
+            <AppText
+              text={TravelAgencyId?.contactInformation}
+              color={"black"}
+              bold={false}
+            />
           </View>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 10,
+            gap: 10,
+          }}
+        >
+          <AppText text={status} color={"green"} size={10} bold={true} />
+          <AppText
+            text={"700RWF"}
+            color={colors.primaryText}
+            size={18}
+            bold={false}
+          />
         </View>
-        <View style={styles.routeCardDetails}>
-          <View style={styles.routeCardDetailsLeft}>
-            <AppText
-              text={startTime}
-              color={"black"}
-              center={false}
-              bold={false}
-            />
-            <AppText
-              text={endTime}
-              color={"black"}
-              center={false}
-              bold={false}
-            />
-          </View>
-          <View style={styles.routeCardDetailsRight}>
-            <AppText text={date} color={"black"} bold={false} center={false} />
-            <AppText
-              text={status}
-              color={status === "Available" ? "green" : "red"}
-              bold={false}
-              center={false}
-            />
-            <AppText
-              text={duration}
-              color={"black"}
-              center={false}
-              bold={false}
-            />
-          </View>
+      </View>
+      <View style={{ width: "100%", alignItems: "center" }}>
+        <View
+          style={{
+            marginLeft: 10,
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            padding: 10,
+          }}
+        >
+          <AppText
+            text={capitalizeString(departureCity)}
+            size={18}
+            color={"black"}
+            bold={true}
+          />
+          <AppText
+            text={capitalizeString(destinationCity)}
+            size={18}
+            color={"black"}
+            bold={false}
+          />
+        </View>
+
+        <View
+          style={{
+            marginTop: 10,
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            padding: 10,
+          }}
+        >
+          <AppText
+            text={departureTime}
+            color={colors.primaryText}
+            bold={true}
+          />
+          <AppText
+            text={departureDate}
+            color={colors.primaryText}
+            bold={true}
+          />
+        </View>
+        {/* <View
+          style={{
+            marginLeft: 10,
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            padding: 10,
+          }}
+        >
+          <AppText text={departureDate} color={"black"} bold={true} />
+          <AppText text={departureDate} color={"black"} bold={false} />
+        </View> */}
+        <View
+          style={{
+            marginTop: 10,
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            padding: 10,
+          }}
+        >
+          <AppText
+            text={`${bookedSeats} booked seats`}
+            color={"black"}
+            bold={false}
+          />
+          <AppText
+            text={`${payedSeats} payed seats`}
+            color={"black"}
+            bold={false}
+          />
+          <AppText
+            text={`${nonPayedSeats} non payed seats`}
+            color={"black"}
+            bold={false}
+          />
         </View>
       </View>
     </TouchableOpacity>
@@ -226,14 +354,42 @@ const RouteCard = ({
 };
 
 const SearchTicketResultScreen = ({ route }) => {
-  console.log(route.params);
   const [selected, setSelectedDate] = useState(false);
+  const [todayJourney, setTodayJourney] = useState();
+  useEffect(() => {
+    const fetchTodayJourney = async () => {
+      try {
+        const response = await API.get("journey/getAllJourneys");
+        setTodayJourney(response.data.data);
+      } catch (error) {}
+    };
+    fetchTodayJourney();
+  }, []);
+
+  console.log(
+    todayJourney?.filter(
+      (item) =>
+        item.departureDate ==
+          new Date(route.params.data.departureDate)
+            .toISOString()
+            .split("T")[0] &&
+        route.params.data.route ===
+          item.departureCity + "-" + item.destinationCity
+    )
+  );
+
+  let filteredJourney = todayJourney?.filter(
+    (item) =>
+      item.departureDate ==
+        new Date(route.params.data.departureDate).toISOString().split("T")[0] &&
+      route.params.data.route ===
+        item.departureCity + "-" + item.destinationCity
+  );
 
   return (
     <ScreenComponent>
       <View style={styles.container}>
-        {/*  use flatlist */}
-        <FlatList
+        {/* <FlatList
           data={generateYearData(2024)}
           keyExtractor={(item) => {
             return new Date(item.date).toISOString().slice(0, 10);
@@ -258,24 +414,56 @@ const SearchTicketResultScreen = ({ route }) => {
           )}
           horizontal
           showsHorizontalScrollIndicator={false}
-        />
+        /> */}
 
-        <FlatList
-          // data={dummyRoutes.filter((route) => {
-          //   console.log(
-          //     selected ? new Date(selected).toISOString().slice(0, 10) : true
-          //   );
-          //   return selected
-          //     ? route.date === new Date(selected).toISOString().slice(0, 10)
-          //     : true;
-          // })}
-          data={dummyRoutes}
-          style={{ marginTop: 10, height: "90%" }}
-          keyExtractor={(item) => {
-            return item.id.toString();
-          }}
-          renderItem={({ item }) => <RouteCard {...item} />}
-        />
+        <AppText text={"Search Results"} center={false} bold={true} size={20} />
+        {filteredJourney?.length > 0 ? (
+          <FlatList
+            // data={dummyRoutes.filter((route) => {
+            //   console.log(
+            //     selected ? new Date(selected).toISOString().slice(0, 10) : true
+            //   );
+            //   return selected
+            //     ? route.date === new Date(selected).toISOString().slice(0, 10)
+            //     : true;
+            // })}
+            data={filteredJourney}
+            style={{ marginTop: 10 }}
+            keyExtractor={(item) => {
+              return item._id;
+            }}
+            renderItem={({ item }) => {
+              return <RouteCard {...item} />;
+            }}
+          />
+        ) : (
+          todayJourney && (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <Image
+                source={{
+                  uri: "https://as1.ftcdn.net/v2/jpg/04/25/45/24/1000_F_425452476_9Uzk2I9lRR4ADsQHByf92spQeMvb2EN2.jpg",
+                }}
+                style={{
+                  height: 200,
+                  width: 200,
+                }}
+              />
+              <AppText
+                text={"No Ticket, good back and search again"}
+                color={"red"}
+                size={20}
+                bold={false}
+              />
+            </View>
+          )
+        )}
       </View>
     </ScreenComponent>
   );
@@ -295,45 +483,24 @@ const styles = StyleSheet.create({
     marginRight: 10,
     flexDirection: "row",
     gap: 10,
-    // height: 100,
+    height: 60,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
   },
 
   routeCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
     backgroundColor: "white",
     borderRadius: 10,
-    margin: 10,
-    marginVertical: 15,
-    boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-    padding: 20,
     marginBottom: 10,
   },
-  routeCardHeader: {
+
+  routeCardLeft: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-    justifyContent: "space-between",
-  },
-  routeCardHeaderImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  routeCardHeaderDetails: {
-    flexDirection: "column",
-  },
-  routeCardDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  routeCardDetailsLeft: {
-    flexDirection: "column",
-    gap: 5,
-  },
-  routeCardDetailsRight: {
-    flexDirection: "column",
   },
 });

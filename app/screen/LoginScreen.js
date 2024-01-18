@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import Screen from "../components/ScreenComponent";
 import * as Yup from "yup";
 import { useNavigation } from "@react-navigation/native";
@@ -9,25 +9,41 @@ import AppFormField from "../components/forms/AppFormField";
 import colors from "../config/colors";
 import AppForm from "../components/forms/AppForm";
 import { API } from "../config/axios";
+import AppContext from "../context/context";
+import { getData, storeData } from "../config/storage";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label("Email"),
   password: Yup.string().required().min(4).label("Password"),
 });
+
+// const ReusableTokenExtractor = (token) => {
+//   const { decodedToken, isExpired } = useJwt(token);
+
+//   if (isExpired) {
+//     return <Text>Expired</Text>;
+//   }
+//   return decodedToken;
+// };
+
 const LoginScreen = () => {
+  const { setUser, user } = useContext(AppContext);
   const navigation = useNavigation();
 
   const handleLogin = async (values) => {
     try {
-      const response = await API.post("/auth/login", values);
-      console.log(response.data);
-      navigation.navigate("Home");
+      const response = await API.post("auth/login", values);
+      storeData("user", response.data);
+      setUser(await getData("user"));
     } catch (error) {
-      console.log(error.response.data);
-      Alert.alert("Error", "Incorrect email or password");
+      console.log(error?.response?.data);
+      if (error?.response) {
+        console.log(error?.response?.data);
+      } else {
+        console.log(error);
+      }
     }
   };
-
   return (
     <Screen>
       <View
@@ -40,10 +56,10 @@ const LoginScreen = () => {
             gap: 25,
           }}
         >
-          <AppText text="Welcome back!" color="black" size={30} bold={true} />
+          <AppText text="Welcome back!" color={"black"} size={30} bold={true} />
           <AppText
             text="Please enter your email and password to login"
-            color="black"
+            color={"black"}
             size={15}
             bold={false}
             center={false}
@@ -81,7 +97,7 @@ const LoginScreen = () => {
           >
             <AppText
               text="Don't have an account?"
-              color={"Black"}
+              color={"black"}
               bold={false}
               center={false}
             />

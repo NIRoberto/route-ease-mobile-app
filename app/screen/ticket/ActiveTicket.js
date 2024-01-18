@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import CompletedTicket from "./CompletedTicket";
 import CancelledTicket from "./CancelledTicket";
@@ -8,6 +8,10 @@ import AppText from "../../components/typo/AppText";
 import colors from "../../config/colors";
 import { FlatList } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { API } from "../../config/axios";
+import AppContext from "../../context/context";
+import { useQuery } from "@tanstack/react-query";
+import { capitalizeString } from "../../utils/func";
 
 export const TicketsData = [
   {
@@ -55,116 +59,191 @@ export const TicketsData = [
 ];
 
 export const TicketCard = ({
-  travelAgency: { name, logo },
-  startTime,
-  endTime,
-  date,
+  TravelAgencyId,
+  _id,
+  carId,
+  directionId,
+  RouteId,
+  departureCity,
+  destinationCity,
+  departureDate,
+  departureTime,
+  plannedSeats,
+  bookedSeats,
+  payedticketsbooked,
+  payedSeats,
+  nonPayedSeats,
+  remainingNonPayedSeats,
   status,
-  duration,
-  origin,
-  destination,
-  user: { fullName, email, phone },
+  agents,
+  createdDate,
 }) => {
   const navigation = useNavigation();
+  console.log(TravelAgencyId?.contactInformation);
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate("ETicketScreen", {
-          data: {
-            travelAgency: {
-              name,
-              logo,
-            },
-            startTime,
-            endTime,
-            date,
-            status,
-            duration,
-            origin,
-            destination,
-            user: {
-              fullName,
-              email,
-              phone,
-            },
-          },
-        });
+        // navigation.navigate("Book", {
+        //   data: {
+        //     TravelAgencyId,
+        //     _id,
+        //     carId,
+        //     directionId,
+        //     RouteId,
+        //     departureCity,
+        //     destinationCity,
+        //     departureDate,
+        //     departureTime,
+        //     plannedSeats,
+        //     bookedSeats,
+        //     payedSeats,
+        //     nonPayedSeats,
+        //     status,
+        //     agents,
+        //     createdDate,
+        //   },
+        // });
+      }}
+      style={{
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "white",
+        borderRadius: 10,
+        marginBottom: 10,
       }}
     >
-      <View style={styles.ticketCard}>
-        <View style={styles.agency}>
-          <View style={styles.agencyDetails}>
-            <Image style={styles.logo} source={logo} />
-            <View>
-              <AppText text={name} center={false} bold={true} size={10} />
-            </View>
-          </View>
-          <View>
-            {status === "Paid" ? (
-              <View style={styles.statusPaid}>
-                <AppText
-                  text={status}
-                  center={false}
-                  bold={true}
-                  size={14}
-                  color={"white"}
-                />
-              </View>
-            ) : status === "Completed" ? (
-              <View style={styles.statusCompleted}>
-                <AppText
-                  text={status}
-                  center={false}
-                  bold={true}
-                  size={14}
-                  color={"white"}
-                />
-              </View>
-            ) : (
-              <View style={styles.statusCancelled}>
-                <AppText
-                  text={status}
-                  center={false}
-                  bold={true}
-                  size={14}
-                  color={"white"}
-                />
-              </View>
-            )}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 10,
+          }}
+        >
+          <Image
+            source={{
+              uri:
+                TravelAgencyId?.image ||
+                "https://horizonexpress.rw/wp-content/uploads/2022/02/Horizon_Express_Logo_Modified_page-0001__1_-removebg-preview.png",
+            }}
+            style={{ width: 50, height: 50, borderRadius: 10 }}
+          />
+          <View style={{ marginLeft: 10 }}>
+            <AppText
+              text={TravelAgencyId?.travelAgenceName}
+              color={"black"}
+              bold={true}
+            />
+            <AppText
+              text={TravelAgencyId?.contactInformation}
+              color={"black"}
+              bold={false}
+            />
           </View>
         </View>
-        <View style={styles.ticketCardBody}>
-          <View style={styles.bodyItem}>
-            <AppText text={origin} center={false} bold={true} size={18} />
-            <AppText text={destination} center={false} bold={true} size={18} />
-          </View>
-          <View style={styles.bodyItem}>
-            <AppText
-              text={startTime}
-              center={false}
-              bold={false}
-              size={18}
-              color={colors.primaryButton}
-            />
-            <AppText
-              text={` Duration ${duration}`}
-              center={false}
-              bold={false}
-              size={14}
-            />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 10,
+            gap: 10,
+          }}
+        >
+          <AppText
+            text={capitalizeString(status)}
+            color={"green"}
+            size={14}
+            bold={true}
+          />
+        </View>
+      </View>
+      <View style={{ width: "100%", alignItems: "center" }}>
+        <View
+          style={{
+            marginLeft: 10,
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            padding: 10,
+          }}
+        >
+          <AppText
+            text={capitalizeString(departureCity)}
+            size={18}
+            color={"black"}
+            bold={true}
+          />
+          <AppText
+            text={capitalizeString(destinationCity)}
+            size={18}
+            color={"black"}
+            bold={false}
+          />
+        </View>
 
-            <AppText
-              text={endTime}
-              center={false}
-              bold={false}
-              size={18}
-              color={colors.primaryButton}
-            />
-          </View>
-          <View style={styles.bodyItem}>
-            <AppText text={date} center={false} bold={false} size={14} />
-            <AppText text={date} center={false} bold={false} size={14} />
-          </View>
+        <View
+          style={{
+            marginTop: 10,
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            padding: 10,
+          }}
+        >
+          <AppText
+            text={departureTime}
+            color={colors.primaryText}
+            bold={true}
+          />
+          <AppText
+            text={departureDate}
+            color={colors.primaryText}
+            bold={true}
+          />
+        </View>
+        {/* <View
+          style={{
+            marginLeft: 10,
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            padding: 10,
+          }}
+        >
+          <AppText text={departureDate} color={"black"} bold={true} />
+          <AppText text={departureDate} color={"black"} bold={false} />
+        </View> */}
+        <View
+          style={{
+            marginTop: 10,
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            padding: 10,
+          }}
+        >
+          {/* <AppText
+            text={`${bookedSeats} booked seats`}
+            color={"black"}
+            bold={false}
+          />
+          <AppText
+            text={`${payedSeats} payed seats`}
+            color={"black"}
+            bold={false}
+          />
+          <AppText
+            text={`${nonPayedSeats} non payed seats`}
+            color={"black"}
+            bold={false}
+          /> */}
         </View>
       </View>
     </TouchableOpacity>
@@ -173,7 +252,6 @@ export const TicketCard = ({
 
 export const TicketTabNavigator = () => {
   const Tab = createMaterialTopTabNavigator();
-
   return (
     <Tab.Navigator
       tabBarOptions={{
@@ -186,13 +264,12 @@ export const TicketTabNavigator = () => {
     >
       <Tab.Screen name="Active" component={ActiveTicket} />
       <Tab.Screen name="Completed" component={CompletedTicket} />
-      <Tab.Screen name="Cancelled" component={CancelledTicket} />
+      {/* <Tab.Screen name="Cancelled" component={CancelledTicket} /> */}
     </Tab.Navigator>
   );
 };
 const ActiveTicket = () => {
-  const Tab = createMaterialTopTabNavigator();
-
+  const { tickets } = useContext(AppContext);
   return (
     <ScreenComponent>
       <AppText
@@ -202,11 +279,17 @@ const ActiveTicket = () => {
         center={true}
         bold={true}
       />
-
+      <AppText
+        text={tickets?.length}
+        size={18}
+        color={"black"}
+        center={false}
+        bold={false}
+      />
       <View style={{ flex: 1, margin: 10 }}>
         <FlatList
-          data={TicketsData}
-          keyExtractor={(item) => item.id.toString()}
+          data={tickets}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => <TicketCard {...item} />}
         />
       </View>

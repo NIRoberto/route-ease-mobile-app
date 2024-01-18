@@ -39,10 +39,9 @@ const OnBoardingLottieImageComponent = ({ image }) => {
   );
 };
 
-// Array of onboarding screens for a state-of-the-art ticket booking application
 const onboardingScreens = [
   {
-    id: 1,
+    key: 1,
     title: "Welcome to Your Premier Bus Ticket Booking App",
     image: (
       // Lottie animation introducing the user to the application
@@ -54,7 +53,7 @@ const onboardingScreens = [
     subtitle: "Embark on a seamless journey with our intuitive platform.",
   },
   {
-    id: 2,
+    key: 2,
     title: "Effortless Booking - Anytime, Anywhere",
     image: (
       // Lottie animation showcasing the ease of ticket booking
@@ -66,7 +65,7 @@ const onboardingScreens = [
     subtitle: "Book your tickets with a few simple taps on your device.",
   },
   {
-    id: 3,
+    key: 3,
     title: "Discover Exclusive Offers and Travel Perks",
     image: (
       // Lottie animation highlighting special discounts and features
@@ -91,7 +90,6 @@ const OnBoardingScreen = () => {
       <Onboarding
         onDone={() => navigation.navigate("Hero")}
         onSkip={() => navigation.navigate("Hero")}
-        key={(item) => item.id}
         DoneButtonComponent={doneBtn}
         bottomBarHighlight={false}
         pages={[...onboardingScreens]}

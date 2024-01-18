@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   Modal,
   StyleSheet,
@@ -6,9 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
+import React, { useContext, useState } from "react";
 import AppText from "../../components/typo/AppText";
-import { RouteCard } from "./BookScreen";
 import colors from "../../config/colors";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -19,6 +19,9 @@ import AppForm from "../../components/forms/AppForm";
 import AppFormField from "../../components/forms/AppFormField";
 import AppSubmitButton from "../../components/forms/AppSubmitButton";
 import ReusableModal from "../../components/ReusableModal";
+import { RouteCard } from "./SearchTicketResultScreen";
+import AppContext from "../../context/context";
+import { API } from "../../config/axios";
 
 const DetailsItem = ({ title, value }) => {
   return (
@@ -36,10 +39,10 @@ const DetailsItem = ({ title, value }) => {
     </View>
   );
 };
-export const ContactDetails = ({ fullName, email, phone }) => {
+export const ContactDetails = ({ fullNames, email, phone }) => {
   return (
     <View style={styles.passengerCard}>
-      <DetailsItem title="Full Names" value={fullName || "Robert"} />
+      <DetailsItem title="Full Names" value={fullNames || "Robert"} />
       <DetailsItem title="Email" value={email || "robert@gmail.com"} />
       <DetailsItem title="Phone" value={phone || "0787491277"} />
     </View>
@@ -85,6 +88,56 @@ const ConfirmBookingScreen = ({ route }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [ticketModalVisible, setTicketModalVisible] = React.useState(false);
   const navigation = useNavigation();
+  const { user } = useContext(AppContext);
+  const [ticketId, setTicketId] = useState();
+
+  const handleConfirmBooking = async () => {
+    try {
+      const response = await API.post(
+        `tickets/buyTickets/${route.params.data._id}`,
+        {
+          ...route.params.data.passenger,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user.access_token}`,
+          },
+        }
+      );
+      console.log(response.data);
+
+      setTicketId(response.data.data.TicketId);
+      setModalVisible(true);
+    } catch (error) {
+      Alert.alert("Failed to book ticket");
+    }
+  };
+  const handlePayTicket = async (values) => {
+    const data = {
+      ...values,
+      amount: route.params.data.directionId.price.toString(),
+    };
+    try {
+      const response = await API.patch(
+        `tickets/payforticket/${ticketId}`,
+        {
+          ...data,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user.access_token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      setModalVisible(false);
+      setTicketModalVisible(true);
+    } catch (error) {
+      console.log(error.response.data);
+      Alert.alert("Failed to book ticket");
+    }
+  };
+
   return (
     <ScreenComponent>
       <View style={styles.container}>
@@ -105,10 +158,7 @@ const ConfirmBookingScreen = ({ route }) => {
           title={"Confirm Booking"}
           color={"white"}
           bgColor={colors.primaryButton}
-          handlePress={() => {
-            console.log("Confirm Booking");
-            setModalVisible(true);
-          }}
+          handlePress={handleConfirmBooking}
         />
       </View>
       <ReusableModal
@@ -116,14 +166,22 @@ const ConfirmBookingScreen = ({ route }) => {
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
       >
-        <AppForm
-          initialValues={{ phone: "" }}
-          onSubmit={(values) => {
-            console.log(values);
-            setTicketModalVisible(true);
-            setModalVisible(false);
-          }}
-        >
+        <AppForm initialValues={{ phone: "" }} onSubmit={handlePayTicket}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <AppText text={"Price"} center={false} size={20} />
+            <AppText
+              text={route.params.data.directionId.price}
+              center={false}
+              bold={true}
+              color={"black"}
+              size={20}
+            />
+          </View>
           <AppFormField
             autoCapitalize="none"
             autoCorrect={false}
@@ -132,10 +190,10 @@ const ConfirmBookingScreen = ({ route }) => {
             placeholder="Phone"
             textContentType="emailAddress"
           />
+
           <AppSubmitButton title="Pay" />
         </AppForm>
       </ReusableModal>
-
       <ReusableModal
         title={""}
         modalVisible={ticketModalVisible}

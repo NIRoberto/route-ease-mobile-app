@@ -4,11 +4,11 @@ import React from "react";
 import QRCode from "react-native-qrcode-svg";
 import ScreenComponent from "../../components/ScreenComponent";
 import AppText from "../../components/typo/AppText";
-import { RouteCard } from "./BookScreen";
 import { ContactDetails } from "./ConfirmBookingScreen";
 import AppButton from "../../components/forms/AppButton";
 import colors from "../../config/colors";
 import { useNavigation } from "@react-navigation/native";
+import { RouteCard } from "./SearchTicketResultScreen";
 
 const DetailsItem = ({ title, value }) => {
   return (

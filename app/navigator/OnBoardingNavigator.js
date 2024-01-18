@@ -32,11 +32,6 @@ const OnBoarding = () => {
       component: RegisterScreen,
       headerShown: true,
     },
-    {
-      name: "Home",
-      component: TabNavigator,
-      headerShown: false,
-    },
   ];
   return (
     <Stack.Navigator

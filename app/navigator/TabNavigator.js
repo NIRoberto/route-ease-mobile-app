@@ -10,7 +10,7 @@ import colors from "../config/colors";
 
 const dataArray = [
   {
-    name: "Home",
+    name: "HomeScreen",
     component: HomeNavigator,
     headerShown: false,
   },

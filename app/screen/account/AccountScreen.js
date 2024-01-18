@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ScreenComponent from "../../components/ScreenComponent";
 
 import colors from "../../config/colors";
@@ -16,11 +16,18 @@ import AppText from "../../components/typo/AppText";
 import { useNavigation } from "@react-navigation/native";
 import ReusableModal from "../../components/ReusableModal";
 import AppButton from "../../components/forms/AppButton";
-
+import { clearAll, removeData } from "../../config/storage";
+import * as Updates from "expo-updates";
+import AppContext from "../../context/context";
 const ProfileInfo = ({ profileImage, name, email }) => {
   return (
     <View style={styles.profileInfo}>
-      <Image style={styles.profileImage} source={profileImage} />
+      <Image
+        style={styles.profileImage}
+        source={{
+          uri: profileImage,
+        }}
+      />
       <View style={styles.profileInfoText}>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.email}>{email}</Text>
@@ -29,10 +36,12 @@ const ProfileInfo = ({ profileImage, name, email }) => {
   );
 };
 const AccountScreen = () => {
-  const navigation = useNavigation();
+  const { setUser, user } = useContext(AppContext);
   const [logoutConfirmModel, setLogoutConfirmModel] = useState(false);
-  const handleLogout = () => {
-    navigation.navigate("Login");
+  const handleLogout = async () => {
+    await removeData("user");
+    setLogoutConfirmModel(false);
+    setUser(null);
   };
 
   const handleNo = () => {
@@ -40,13 +49,17 @@ const AccountScreen = () => {
     console.log("No");
   };
 
+  useEffect(() => {}, [logoutConfirmModel]);
+
   return (
     <ScreenComponent>
       <View style={styles.container}>
         <ProfileInfo
-          profileImage={require("../../assets/Robert.png")}
-          name={"Robert Niyitanga"}
-          email={"robert@gmail.com"}
+          profileImage={
+            "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+          }
+          name={user.user.fullNames}
+          email={user.user.email}
         />
 
         <SectionList
